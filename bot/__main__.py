@@ -5,6 +5,7 @@ from aiogram.contrib.fsm_storage.redis import RedisStorage2
 
 from .config import load_config
 from .handlers.fuel_report_handler import FuelReportHandler, register_fuel_report_handler
+from .handlers.delivery_basis_report_handler import DeliveryBasisReportHandler, register_delivery_basis_report_handler
 from .logger import setup_logger
 
 
@@ -19,6 +20,9 @@ async def main():
 
     fuel_report_handler = FuelReportHandler()
     register_fuel_report_handler(dp, fuel_report_handler)
+
+    delivery_basis_report_handler = DeliveryBasisReportHandler()
+    register_delivery_basis_report_handler(dp, delivery_basis_report_handler)
 
     logger.info('starting bot')
     try:

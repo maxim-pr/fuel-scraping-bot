@@ -79,6 +79,8 @@ class TradeResultsParser:
         # convert column to float type
         trade_results['Цена (за единицу измерения), руб - Средневзвешенная'] = \
             pd.to_numeric(trade_results['Цена (за единицу измерения), руб - Средневзвешенная'])
+        trade_results['Изменение рыночной цены к цене предыдуего дня, руб'] = \
+            pd.to_numeric(trade_results['Изменение рыночной цены к цене предыдуего дня, руб'])
 
     async def retrieve_all_instruments(self) -> pd.DataFrame:
         """
@@ -89,12 +91,15 @@ class TradeResultsParser:
         trade_results = await self._retrieve_trade_results()
         self._preprocess_trade_results(trade_results)
 
-        return trade_results.loc[:, [
-                                        'Код Инструмента',
-                                        'Наименование Инструмента',
-                                        'Базис поставки',
-                                        'Цена (за единицу измерения), руб - Средневзвешенная'
-                                    ]]
+        return trade_results.loc[
+               :,
+               [
+                   'Код Инструмента',
+                   'Наименование Инструмента',
+                   'Базис поставки',
+                   'Цена (за единицу измерения), руб - Средневзвешенная',
+                   'Изменение рыночной цены к цене предыдуего дня, руб'
+               ]]
 
     async def close(self):
         await self._session.close()

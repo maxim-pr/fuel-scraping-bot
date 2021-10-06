@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import uuid
 
 import aiohttp
@@ -11,6 +12,7 @@ from aiogram.utils.callback_data import CallbackData
 
 from parsers.departure_stations_parser import DepartureStationsParser
 from parsers.errors import HtmlParsingError, ApiError, InvalidStationError, InvalidFuelError
+from ..utils import save_as_xl
 
 
 class FuelReportStates(StatesGroup):
@@ -86,8 +88,11 @@ class FuelReportHandler:
             await message.answer('Извините, что-то совсем пошло не так(')
         else:
             file_name = uuid.uuid4()
-            report.to_excel(f"/tmp/{file_name}.xlsx")
-            await message.answer_document(open(f"/tmp/{file_name}.xlsx", 'rb'))
+            file_path = f"/tmp/{file_name}.xlsx"
+            save_as_xl(report, file_path)
+            await message.answer_document(open(file_path, 'rb'))
+            if os.path.isfile(file_path):
+                os.remove(file_path)
         finally:
             await parser.close()
             await state.finish()
