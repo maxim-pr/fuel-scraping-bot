@@ -1,34 +1,31 @@
+
+from configargparse import ArgumentParser, ArgumentDefaultsHelpFormatter, YAMLConfigFileParser
 import os
-from environs import Env
-from dataclasses import dataclass
 
 
 ENV_VAR_PREFIX = 'FPB_'
 
 
-@dataclass(frozen=True)
-class Config:
-    BOT_TOKEN: str
-    ADMINS: list[int]
-    REDIS_IP: str
-    REDIS_PORT: int
-    REDIS_DB: int
-
-
-def load_config() -> Config:
-    env = Env()
-    env.read_env()
-
-    config = Config(
-        BOT_TOKEN=env.str(ENV_VAR_PREFIX + 'BOT_TOKEN'),
-        ADMINS=env.list(ENV_VAR_PREFIX + 'ADMINS'),
-        REDIS_IP=env.str(ENV_VAR_PREFIX + 'REDIS_IP'),
-        REDIS_PORT=env.int(ENV_VAR_PREFIX + 'REDIS_PORT'),
-        REDIS_DB=env.int(ENV_VAR_PREFIX + 'REDIS_DB')
+def setup_args_parser() -> ArgumentParser:
+    parser = ArgumentParser(
+        auto_env_var_prefix=ENV_VAR_PREFIX,
+        default_config_files=['config.yml'],
+        config_file_parser_class=YAMLConfigFileParser,
+        args_for_setting_config_path=['-c', '--config-file'],
+        config_arg_help_message='Config file path',
+        formatter_class=ArgumentDefaultsHelpFormatter
     )
 
-    clear_env_vars()
-    return config
+    bot_group = parser.add_argument_group('bot')
+    bot_group.add_argument('--bot-token', type=str, help='Telegram bot token (is received via @BotFather)')
+    bot_group.add_argument('--bot-admin', type=int, help='ID of bot admin')
+
+    redis_group = parser.add_argument_group('redis')
+    redis_group.add_argument('--redis-ip', type=str, default='redis-server', help='IP of redis server')
+    redis_group.add_argument('--redis-port', type=int, default=6379, help='Port of redis server')
+    redis_group.add_argument('--redis-db', type=int, default=1, help='Redis database number')
+
+    return parser
 
 
 def clear_env_vars():
