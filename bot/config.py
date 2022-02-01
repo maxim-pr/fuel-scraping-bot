@@ -1,4 +1,3 @@
-
 from configargparse import ArgumentParser, ArgumentDefaultsHelpFormatter, YAMLConfigFileParser
 import os
 
@@ -23,7 +22,8 @@ def setup_args_parser() -> ArgumentParser:
     redis_group = parser.add_argument_group('redis')
     redis_group.add_argument('--redis-ip', type=str, default='redis-server', help='IP of redis server')
     redis_group.add_argument('--redis-port', type=int, default=6379, help='Port of redis server')
-    redis_group.add_argument('--redis-db', type=int, default=1, help='Redis database number')
+    redis_group.add_argument('--redis-password', type=str, help='Password of redis server')
+    redis_group.add_argument('--redis-db', type=int, default=0, help='Redis database number')
 
     return parser
 
