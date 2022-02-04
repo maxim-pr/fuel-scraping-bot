@@ -129,6 +129,12 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# IDE files
 .idea/
+
+# Logs
 bot.log
 parsers.log
+
+# Configs
+parsers/config/config.yml

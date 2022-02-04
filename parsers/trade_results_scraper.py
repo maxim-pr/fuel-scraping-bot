@@ -6,10 +6,10 @@ from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
 from .errors import HtmlParsingError
-from .requester import Requester
+from parsers.requester import Requester
 
 
-class TradeResultsParser:
+class TradeResultsScraper:
     def __init__(self):
         self._URL = "https://spimex.com/markets/oil_products/trades/results/"
 

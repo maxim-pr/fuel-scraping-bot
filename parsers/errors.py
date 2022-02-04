@@ -6,7 +6,7 @@ class HtmlParsingError(Exception):
         super().__init__(self.message)
 
 
-class ApiError(Exception):
+class ApiResponseError(Exception):
     def __init__(self, message: str = 'API returned error'):
         self.message = message
         super().__init__(self.message)

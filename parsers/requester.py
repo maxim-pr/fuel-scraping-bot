@@ -1,52 +1,67 @@
 import asyncio
 import logging
-from time import time
+from time import monotonic
 
-from aiohttp import ClientSession, ClientResponse, ClientTimeout
+from aiohttp import ClientSession, ClientResponse
 
 
 class Requester:
-    def __init__(self, session: ClientSession, timeout: int = 1, tries: int = 2):
-        if timeout < 1:
-            raise ValueError('timeout should be greater than 0')
+    """
+    Wrapper around ClientSession to enable retries and logging
+    """
+
+    def __init__(
+            self,
+            session: ClientSession,
+            init_timeout: float = 0.5,
+            tries: int = 3
+    ):
+        if init_timeout <= 0:
+            raise ValueError('init_timeout should be greater than 0')
         if tries < 1:
             raise ValueError('tries should be greater than 0')
 
-        self._MAX_TIMEOUT = 16
-        self._MAX_TRIES = 4
-        self._timeout = min(timeout, self._MAX_TIMEOUT)
-        self._tries = min(tries, self._MAX_TRIES)
+        self._init_timeout = init_timeout
+        self._tries = tries
         self._session = session
         self._logger = logging.getLogger(__name__)
 
     async def request(self, method: str, url: str, **kwargs) -> ClientResponse:
-        timeout = ClientTimeout(total=self._timeout)
+        """
+        Raises :class:`asyncio.TimeoutError`
+        """
 
-        for i in range(self._tries - 1):
-            time_start = time()
+        timeout = self._init_timeout
+        response = None
+
+        for _ in range(self._tries):
+            time_start = monotonic()
             try:
-                response = await self._session.request(method, url, timeout=timeout, **kwargs)
+                response = await self._session.request(
+                    method, url, timeout=timeout, **kwargs
+                )
             except asyncio.TimeoutError:
-                self._logger.warning(f"{method.upper()} {url} {timeout.total}s timeout")
-                timeout = ClientTimeout(total=min(timeout.total * 2, self._MAX_TIMEOUT))
+                self._log_timeout(method, url, timeout)
             else:
-                time_end = time()
+                time_end = monotonic()
                 self._log_response(response, time_end - time_start)
-                response.raise_for_status()
+                if response.status < 500:
+                    break
+            finally:
+                timeout *= 2
 
-                return response
+        if response:
+            return response
 
-        time_start = time()
-        response = await self._session.request(method, url, timeout=timeout, **kwargs)
-        time_end = time()
-        self._log_response(response, time_end - time_start)
-        response.raise_for_status()
+        raise asyncio.TimeoutError()
 
-        return response
-
-    def _log_response(self, response: ClientResponse, time_: float):
-        log_message = f"{response.method} {response.url} {response.status} {round(time_, 2)}s"
+    def _log_response(self, response: ClientResponse, time: float):
+        log_message = f"{response.method} {response.url} " \
+                      f"{response.status} {round(time * 1000, 3)}ms"
         if response.ok:
             self._logger.info(log_message)
         else:
             self._logger.error(log_message)
+
+    def _log_timeout(self, method: str, url: str, timeout: float):
+        self._logger.warning(f"{method.upper()} {url} {timeout}s timeout")

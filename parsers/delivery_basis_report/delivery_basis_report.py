@@ -1,12 +1,12 @@
 import pandas as pd
 
-from ..trade_results_parser import TradeResultsParser
+from ..trade_results_scraper import TradeResultsScraper
 
 
 class DeliveryBasisReporter:
     def __init__(self, template_file_path: str):
         self._template_file_path = template_file_path
-        self._trade_results_parser = TradeResultsParser()
+        self._trade_results_parser = TradeResultsScraper()
 
     async def get_report(self):
         instruments = await self._trade_results_parser.retrieve_all_instruments()

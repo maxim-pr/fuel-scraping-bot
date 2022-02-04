@@ -10,8 +10,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
-from parsers.departure_stations_parser import DepartureStationsParser
-from parsers.errors import HtmlParsingError, ApiError, InvalidStationError, InvalidFuelError
+from parsers.departure_stations_scraper import DepartureStationsScraper
+from parsers.errors import HtmlParsingError, ApiResponseError, InvalidStationError, InvalidFuelError
 from ..utils import save_as_xl
 
 
@@ -68,7 +68,7 @@ class FuelReportHandler:
 
         self._logger.info(f"{message.from_user.id}: {arrival_station}")
 
-        parser = DepartureStationsParser()
+        parser = DepartureStationsScraper()
         try:
             report = await parser.get_report(arrival_station, fuel_name)
         except asyncio.TimeoutError as err:
@@ -80,7 +80,7 @@ class FuelReportHandler:
         except InvalidFuelError as err:
             self._logger.exception(err)
             await message.answer(f"{err.fuel} - невалидное топливо")
-        except (ApiError, HtmlParsingError, aiohttp.ClientError) as err:
+        except (ApiResponseError, HtmlParsingError, aiohttp.ClientError) as err:
             self._logger.exception(err)
             await message.answer('Извините, что-то пошло не так(')
         except Exception as err:

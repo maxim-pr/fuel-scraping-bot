@@ -8,7 +8,7 @@ from aiogram import Dispatcher
 from aiogram import types
 
 from parsers.delivery_basis_report.delivery_basis_report import DeliveryBasisReporter
-from parsers.errors import ApiError, HtmlParsingError
+from parsers.errors import ApiResponseError, HtmlParsingError
 from ..utils import save_as_xl
 
 
@@ -25,7 +25,7 @@ class DeliveryBasisReportHandler:
         except asyncio.TimeoutError as err:
             self._logger.exception(err)
             await message.answer('spimex.com не отвечает(')
-        except (ApiError, HtmlParsingError, aiohttp.ClientError) as err:
+        except (ApiResponseError, HtmlParsingError, aiohttp.ClientError) as err:
             self._logger.exception(err)
             await message.answer('Извините, что-то пошло не так(')
         except Exception as err:
