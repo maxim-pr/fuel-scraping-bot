@@ -1,6 +1,7 @@
-from configargparse import ArgumentParser, ArgumentDefaultsHelpFormatter, YAMLConfigFileParser
 import os
 
+from configargparse import ArgumentParser, ArgumentDefaultsHelpFormatter, \
+    YAMLConfigFileParser
 
 ENV_VAR_PREFIX = 'FPB_'
 
@@ -16,14 +17,29 @@ def setup_args_parser() -> ArgumentParser:
     )
 
     bot_group = parser.add_argument_group('bot')
-    bot_group.add_argument('--bot-token', type=str, help='Telegram bot token (is received via @BotFather)')
-    bot_group.add_argument('--bot-admin', type=int, help='ID of bot admin')
+    bot_group.add_argument('--bot-token',
+                           type=str,
+                           help='Telegram bot token')
+    bot_group.add_argument('--bot-admin',
+                           type=int,
+                           help='ID of bot admin')
 
     redis_group = parser.add_argument_group('redis')
-    redis_group.add_argument('--redis-ip', type=str, default='redis-server', help='IP of redis server')
-    redis_group.add_argument('--redis-port', type=int, default=6379, help='Port of redis server')
-    redis_group.add_argument('--redis-password', type=str, help='Password of redis server')
-    redis_group.add_argument('--redis-db', type=int, default=0, help='Redis database number')
+    redis_group.add_argument('--redis-ip',
+                             type=str,
+                             default='redis-server',
+                             help='IP of redis server')
+    redis_group.add_argument('--redis-port',
+                             type=int,
+                             default=6379,
+                             help='Port of redis server')
+    redis_group.add_argument('--redis-password',
+                             type=str,
+                             help='Password of redis server')
+    redis_group.add_argument('--redis-db',
+                             type=str,
+                             default='0',
+                             help='Redis database number')
 
     return parser
 

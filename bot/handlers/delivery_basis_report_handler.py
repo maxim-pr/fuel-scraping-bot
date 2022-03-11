@@ -7,7 +7,8 @@ import aiohttp
 from aiogram import Dispatcher
 from aiogram import types
 
-from parsers.delivery_basis_report.delivery_basis_report import DeliveryBasisReporter
+from parsers.delivery_basis_report.delivery_basis_report import \
+    DeliveryBasisReporter
 from parsers.errors import ApiResponseError, HtmlParsingError
 from ..utils import save_as_xl
 
@@ -19,7 +20,9 @@ class DeliveryBasisReportHandler:
     async def handler(self, message: types.Message):
         self._logger.info(f"{message.from_user.id}: {message.text}")
 
-        reporter = DeliveryBasisReporter(template_file_path='parsers/delivery_basis_report/template.csv')
+        reporter = DeliveryBasisReporter(
+            template_file_path='parsers/delivery_basis_report/template.csv'
+        )
         try:
             report = await reporter.get_report()
         except asyncio.TimeoutError as err:
@@ -44,8 +47,9 @@ class DeliveryBasisReportHandler:
 
 def register_delivery_basis_report_handler(
         dp: Dispatcher,
-        delivery_basis_report_handler: DeliveryBasisReportHandler):
-    dp.register_message_handler(delivery_basis_report_handler.handler,
-                                commands=['delivery_basis_report'])
-
-
+        delivery_basis_report_handler: DeliveryBasisReportHandler
+):
+    dp.register_message_handler(
+        delivery_basis_report_handler.handler,
+        commands=['delivery_basis_report']
+    )

@@ -13,7 +13,7 @@ class Requester:
     def __init__(
             self,
             session: ClientSession,
-            init_timeout: float = 0.5,
+            init_timeout: float = 2,
             tries: int = 3
     ):
         if init_timeout <= 0:

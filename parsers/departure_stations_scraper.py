@@ -52,9 +52,11 @@ class DepartureStationsScraper:
         all_instruments = await self._trade_results_parser.retrieve_all_instruments()
 
         # filter all instruments by instrument code prefixes
-        instruments: pd.DataFrame = \
-            all_instruments.loc[all_instruments['Код Инструмента'].str.
-                                    startswith(instrument_code_prefixes), :]
+        instruments = all_instruments.loc[
+                            all_instruments['Код Инструмента'].str.startswith(
+                                tuple(instrument_code_prefixes)
+                            ), :
+                        ]
 
         # add columns
         instruments.loc[:, 'Название станции (как в калькуляторе)'] = np.NaN

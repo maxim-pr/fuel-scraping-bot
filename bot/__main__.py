@@ -4,8 +4,10 @@ from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
 
 from .config import setup_args_parser
-from .handlers.fuel_report_handler import FuelReportHandler, register_fuel_report_handler
-from .handlers.delivery_basis_report_handler import DeliveryBasisReportHandler, register_delivery_basis_report_handler
+from .handlers.delivery_basis_report_handler import \
+    DeliveryBasisReportHandler, register_delivery_basis_report_handler
+from .handlers.fuel_report_handler import FuelReportHandler, \
+    register_fuel_report_handler
 from .logger import setup_logger
 
 
@@ -33,7 +35,8 @@ async def main():
         logger.info('stopping bot')
         await dp.storage.close()
         await dp.storage.wait_closed()
-        await dp.bot.session.close()
+        session = await dp.bot.get_session()
+        await session.close()
 
 
 if __name__ == '__main__':

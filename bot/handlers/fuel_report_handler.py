@@ -11,7 +11,8 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
 from parsers.departure_stations_scraper import DepartureStationsScraper
-from parsers.errors import HtmlParsingError, ApiResponseError, InvalidStationError, InvalidFuelError
+from parsers.errors import HtmlParsingError, ApiResponseError, \
+    InvalidStationError, InvalidFuelError
 from ..utils import save_as_xl
 
 
@@ -34,7 +35,9 @@ class FuelReportHandler:
         for fuel_name in self._fuel_names:
             button = InlineKeyboardButton(
                 text=fuel_name,
-                callback_data=self._callback_data_factory.new(fuel_name=fuel_name)
+                callback_data=self._callback_data_factory.new(
+                    fuel_name=fuel_name
+                )
             )
             keyboard.insert(button)
 
@@ -44,12 +47,15 @@ class FuelReportHandler:
         return self._callback_data_factory.filter()
 
     async def start_handler(self, message: types.Message, state: FSMContext):
-        await message.answer('Выберите топливо:', reply_markup=self._create_fuel_keyboard())
+        await message.answer('Выберите топливо:',
+                             reply_markup=self._create_fuel_keyboard())
         await state.set_state(FuelReportStates.entering_fuel)
 
         self._logger.info(f"{message.from_user.id}: /fuel_report")
 
-    async def entered_fuel_handler(self, callback: types.CallbackQuery, callback_data: dict[str, str], state: FSMContext):
+    async def entered_fuel_handler(self, callback: types.CallbackQuery,
+                                   callback_data: dict[str, str],
+                                   state: FSMContext):
         fuel_name = callback_data['fuel_name']
         await callback.answer(text=f"Вы выбрали {fuel_name}")
         await callback.message.edit_reply_markup()
@@ -62,7 +68,8 @@ class FuelReportHandler:
 
         self._logger.info(f"{callback.from_user.id}: {fuel_name}")
 
-    async def entered_station_handler(self, message: types.Message, state: FSMContext):
+    async def entered_station_handler(self, message: types.Message,
+                                      state: FSMContext):
         arrival_station = message.text
         fuel_name = (await state.get_data())['fuel_name']
 
@@ -98,11 +105,18 @@ class FuelReportHandler:
             await state.finish()
 
 
-def register_fuel_report_handler(dp: Dispatcher, fuel_report_handler: FuelReportHandler):
-    dp.register_message_handler(fuel_report_handler.start_handler,
-                                commands=['fuel_report'])
-    dp.register_callback_query_handler(fuel_report_handler.entered_fuel_handler,
-                                       fuel_report_handler.fuel_step_filter(),
-                                       state=FuelReportStates.entering_fuel)
-    dp.register_message_handler(fuel_report_handler.entered_station_handler,
-                                state=FuelReportStates.entering_station)
+def register_fuel_report_handler(dp: Dispatcher,
+                                 fuel_report_handler: FuelReportHandler):
+    dp.register_message_handler(
+        fuel_report_handler.start_handler,
+        commands=['fuel_report']
+    )
+    dp.register_callback_query_handler(
+        fuel_report_handler.entered_fuel_handler,
+        fuel_report_handler.fuel_step_filter(),
+        state=FuelReportStates.entering_fuel
+    )
+    dp.register_message_handler(
+        fuel_report_handler.entered_station_handler,
+        state=FuelReportStates.entering_station
+    )
