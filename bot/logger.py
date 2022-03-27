@@ -1,8 +1,7 @@
 import logging
 
 
-def setup_logger() -> logging.Logger:
-    logger = logging.getLogger('bot')
+def setup_logger(logger: logging.Logger):
     logger.setLevel(logging.INFO)
 
     logger_handler = logging.StreamHandler()
@@ -13,6 +12,4 @@ def setup_logger() -> logging.Logger:
     )
 
     logger_handler.setFormatter(logger_formatter)
-
     logger.addHandler(logger_handler)
-    return logger

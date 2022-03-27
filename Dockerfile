@@ -1,8 +1,8 @@
 FROM python:3.9
 
-WORKDIR /opt/fuel_parser_bot
+WORKDIR /opt/fuel_scraping_bot/
 COPY bot/ bot/
-COPY parsers/ parsers/
+COPY scrapers/ scrapers/
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt

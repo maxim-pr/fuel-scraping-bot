@@ -8,6 +8,13 @@ services:
     environment:
       FPB_BOT_TOKEN: ${FPB_BOT_TOKEN}
       FPB_BOT_ADMIN: ${FPB_BOT_ADMIN}
+      FPB_REDIS_IP: redis-server
+
+    volumes:
+      - ./data:/opt/fuel_scraping_bot/data
+
+    networks:
+      - network
 
     depends_on:
       - redis-server
@@ -19,5 +26,11 @@ services:
     volumes:
       - redis-data:/var/lib/redis
 
+    networks:
+      - network
+
 volumes:
   redis-data:
+
+networks:
+  network:

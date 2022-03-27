@@ -136,5 +136,4 @@ dmypy.json
 bot.log
 parsers.log
 
-# Configs
-parsers/config/config.yml
+data/

@@ -1,5 +1,3 @@
-import logging
-
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 from yarl import URL
@@ -7,18 +5,17 @@ from yarl import URL
 from .errors import HtmlParsingError, ApiResponseError, InvalidStationError, \
     InvalidFuelError
 from .requester import Requester
-from .utils import to_form_data
+from .utils import to_multipart_form_data, ScraperConfig
 
 
 class CalculatorScraper:
-    def __init__(self, url: str, api_endpoint_url: str):
-        self._url = url
-        self._api_endpoint_url = api_endpoint_url
-        self._session = ClientSession()
-        self._session.headers['Host'] = URL(url).host
+    def __init__(self, config: ScraperConfig):
+        self._url = config.CALCULATOR_URL
+        self._api_endpoint_url = config.API_ENDPOINT_URL
+        self._session = ClientSession(raise_for_status=True)
+        self._session.headers['Host'] = URL(self._url).host
         self._requester = Requester(self._session)
         self._sessid = None
-        self._logger = logging.getLogger(__name__)
 
     async def _init_request(self) -> str:
         """
@@ -30,7 +27,6 @@ class CalculatorScraper:
         """
 
         response = await self._requester.request(method='GET', url=self._url)
-        response.raise_for_status()
         response_html = await response.text()
 
         # retrieve sessid from response html page
@@ -52,7 +48,7 @@ class CalculatorScraper:
         :param object_name: the name of the object
         :return: dictionary with information
 
-        Raises :class:`aiohttp.ClientResponseError`,
+        Raises ValueError, :class:`aiohttp.ClientResponseError`,
         :class:`asyncio.TimeoutError`, :class:`ApiResponseError`,
         :class:`InvalidStationError`, :class:`InvalidFuelError`
         """
@@ -73,7 +69,7 @@ class CalculatorScraper:
             route = '/calculator/api/products/filteredByNameOrCode/'
         route += object_name
 
-        form_data = to_form_data(
+        form_data = to_multipart_form_data(
             {
                 'action': 'getData',
                 'sessid': self._sessid,
@@ -87,7 +83,6 @@ class CalculatorScraper:
             url=self._api_endpoint_url,
             data=form_data
         )
-        response.raise_for_status()
         response_json = await response.json()
 
         if response_json.get('error'):
@@ -101,9 +96,9 @@ class CalculatorScraper:
 
         return response_json['data'][0]
 
-    async def get_rzd_cost_info(self, st1: str, st2: str,
-                                fuel: str, weight: int,
-                                capacity: int) -> dict[str, str]:
+    async def get_rzd_price_info(self, st1: str, st2: str,
+                                 fuel: str, weight: int,
+                                 capacity: int) -> dict[str, str]:
         """
         Retrieves rzd cost from API
 
@@ -131,7 +126,7 @@ class CalculatorScraper:
                                                 object_name=fuel))['code']
 
         # set form data
-        form_data = to_form_data(
+        form_data = to_multipart_form_data(
             {
                 'action': 'getCalculation',
                 'sessid': self._sessid,
@@ -155,7 +150,6 @@ class CalculatorScraper:
             url=self._api_endpoint_url,
             data=form_data
         )
-        response.raise_for_status()
         response_data = await response.json()
 
         if response_data.get('error'):
