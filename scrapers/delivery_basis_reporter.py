@@ -44,7 +44,7 @@ class DeliveryBasisReporter:
 
         table_dict = dict()
         for ind in table.index:
-            for column in table.columns[3:]:
+            for column in table.columns[2:]:
                 instrument_code = table.loc[ind, column]
                 if pd.notna(instrument_code):
                     table_dict[instrument_code] = (ind, column)
